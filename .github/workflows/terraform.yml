@@ -30,3 +30,14 @@ jobs:
 
       - name: tflint
         run: docker run --rm -v $(pwd):/data -t wata727/tflint
+  test:
+    name: "Validate"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '290.0.1'
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GOOGLE_CLOUD_KEYFILE_JSON }}
+          export_default_credentials: true
+      - run: gcloud info
