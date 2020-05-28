@@ -38,7 +38,8 @@ jobs:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_key: ${{ secrets.GOOGLE_CLOUD_KEYFILE_JSON }}
           export_default_credentials: true
-      - run: gcloud info
+
+      - run: gcloud container clusters get-credentials validation-cluster --region europe-west1 --project ${{ secrets.GCP_PROJECT_ID }}
 
       - name: "Checkout"
         uses: actions/checkout@master
