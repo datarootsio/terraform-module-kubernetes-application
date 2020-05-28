@@ -1,0 +1,32 @@
+name: "tests"
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+env:
+  tests_timeout: "2h"
+  golangci_lint_version: "v1.26"
+  databricks_repo: "datarootsio/databricks-terraform"
+  databricks_branch: "bugfix/content-state-validate"
+jobs:
+  validate:
+    name: "Validate"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@master
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: tflint
+        run: docker run --rm -v $(pwd):/data -t wata727/tflint
