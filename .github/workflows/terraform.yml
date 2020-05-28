@@ -40,6 +40,9 @@ jobs:
           export_default_credentials: true
       - run: gcloud info
 
+      - name: "Checkout"
+        uses: actions/checkout@master
+
       - name: "go vet"
         run: go vet ./...
 
