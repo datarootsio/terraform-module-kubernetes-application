@@ -9,8 +9,6 @@ on:
 env:
   tests_timeout: "2h"
   golangci_lint_version: "v1.26"
-  databricks_repo: "datarootsio/databricks-terraform"
-  databricks_branch: "bugfix/content-state-validate"
 jobs:
   validate:
     name: "Validate"
