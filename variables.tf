@@ -11,6 +11,7 @@ variable "namespace" {
 variable "image" {
   type        = any
   description = "The image to deploy."
+  default     = {}
 }
 
 variable "args" {
