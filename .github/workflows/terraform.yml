@@ -31,7 +31,7 @@ jobs:
       - name: tflint
         run: docker run --rm -v $(pwd):/data -t wata727/tflint
   test:
-    name: "Validate"
+    name: "Tests"
     runs-on: ubuntu-latest
     steps:
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
