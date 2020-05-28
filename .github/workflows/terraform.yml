@@ -41,3 +41,14 @@ jobs:
           service_account_key: ${{ secrets.GOOGLE_CLOUD_KEYFILE_JSON }}
           export_default_credentials: true
       - run: gcloud info
+
+      - name: "go vet"
+        run: go vet ./...
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v1
+        with:
+          version: ${{ env.golangci_lint_version }}
+
+      - name: "go test"
+        run: go test -timeout ${{ env.tests_timeout }} ./...
