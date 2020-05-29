@@ -1,18 +1,69 @@
 # Terraform module Kubernetes application
 
-This is a module for Terraform that deploys a complete and opinionated data lake network on Microsoft Azure.
+This is a module that deploy an opiniated kubernetes application, i.e. a Deployment and its associated resources (service, service account, hpa, ingress).
+
+The goal is to provide a "Helm like" terraform module, allowing simple k8s deployments with no need to reinvent the wheel or duplicate the code too much.
 
 [![maintained by dataroots](https://img.shields.io/badge/maintained%20by-dataroots-%2300b189)](https://dataroots.io)
 [![Terraform 0.12](https://img.shields.io/badge/terraform-0.12-%23623CE4)](https://www.terraform.io)
 [![Terraform Registry](https://img.shields.io/badge/terraform-registry-%23623CE4)](https://registry.terraform.io/modules/datarootsio/kubernetes-application/module/)
 [![tests](https://github.com/datarootsio/terraform-module-kubernetes-application/workflows/tests/badge.svg?branch=master)](https://github.com/datarootsio/terraform-module-kubernetes-application/actions)
 
+## Modules variables considerations
+
+This module is intended to be as generic as possible. As it's not possible to know all the specific values upfront, all variables of this module are of type `any`. This is needed to allow creation of complex maps for the values. Also, kubernetes allows multiple containers per pods, each one with its own values, variables, etc.
+
+All the documentation of this module will show multi-container variables. If you deployment only uses a single container, it is possible to omit the container name and it will still work.
+
+For instance, you can use either this syntax :
+
+```hcl
+name = "foo"
+
+namespace = "bar"
+
+image = "test:latest"
+
+args = ["hello"]
+
+ports = {
+  "6000" = {
+    "protocol" = "UDP"
+  }
+}
+```
+
+or this syntax :
+
+```hcl
+name = "foo"
+
+namespace = "bar"
+
+image = { 
+  "foobar" = "test:latest"
+}
+
+args = { 
+  "foobar" = ["hello"] 
+}
+
+ports = {
+  "foobar" = {
+    "6000" = {
+      "protocol" = "UDP"
+    }
+  }
+}
+```
+
+However, you have to be consistent across variables, you cannot mix styles.
 
 ## Requirements
 
 | Name      | Version |
 | --------- | ------- |
-| terraform | ~> 0.12 |
+| terraform | ~> 0.12.20 |
 
 ## Providers
 
@@ -189,57 +240,51 @@ hpa = {
 ## Example usage
 
 ```hcl
-module "traefik_forward_auth_deployment" {
+module "my_super_application" {
   source    = "datarootsio/kubernetes-application/module"
   version   = "~> 0.1"
-  name      = "traefik-forward-auth"
-  namespace = kubernetes_namespace.traefik.metadata.0.name
+  name      = "some-name"
+  namespace = kubernetes_namespace.mynamespace.metadata.0.name
 
   image = {
-    "traefik-forward-auth" = "thomseddon/traefik-forward-auth:2"
+    "my-image" = "someimage:v1"
   }
 
   ports = {
-    "traefik-forward-auth" = {
-      "4181" = {
+    "my-image" = {
+      "5000" = {
         "protocol" = "TCP"
       }
     }
   }
 
   environment_variables_from_secret = {
-    "traefik-forward-auth" = {
-      "PROVIDERS_OIDC_CLIENT_ID" = {
-        secret_name = kubernetes_secret.traefik_forward_auth.metadata.0.name
-        secret_key  = "clientId"
+    "my-image" = {
+      "SECRET_URL" = {
+        secret_name = kubernetes_secret.my_secret.metadata.0.name
+        secret_key  = "secret-url"
       }
 
-      "PROVIDERS_OIDC_CLIENT_SECRET" = {
-        secret_name = kubernetes_secret.traefik_forward_auth.metadata.0.name
-        secret_key  = "clientSecret"
-      }
-
-      "SECRET" = {
-        secret_name = kubernetes_secret.traefik_forward_auth.metadata.0.name
-        secret_key  = "secretCookie"
+      "PASSWORD" = {
+        secret_name = kubernetes_secret.my_secret.metadata.0.name
+        secret_key  = "password"
       }
     }
   }
 
   environment_variables = {
-    "traefik-forward-auth" = {
-      "DEFAULT_PROVIDER"          = "oidc"
-      "LOG_LEVEL"                 = "debug"
-      "INSECURE_COOKIE"           = "true"
-      "PROVIDERS_OIDC_ISSUER_URL" = "https://sts.windows.net/${data.azurerm_client_config.current.tenant_id}/"
+    "my-image" = {
+      "USERNAME"  = "user"
+      "LOG_LEVEL" = "debug"
     }
   }
 
   readiness_probes = {
-    "traefik-forward-auth" = {
+    "my-image" = {
       type = "tcp_socket"
+
       tcp_socket = {
-        port = 4181
+        port = 5000
       }
       initial_delay_seconds = 15
       period_seconds        = 10
@@ -247,10 +292,12 @@ module "traefik_forward_auth_deployment" {
   }
 
   liveness_probes = {
-    "traefik-forward-auth" = {
-      type = "tcp_socket"
-      tcp_socket = {
-        port = 4181
+    "my-image" = {
+      type = "http_get"
+
+      http_get = {
+        path = "/nginx_status"
+        port = 80
       }
       initial_delay_seconds = 15
       period_seconds        = 10
