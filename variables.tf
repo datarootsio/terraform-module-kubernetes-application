@@ -101,6 +101,27 @@ variable "hpa" {
 
 locals {
 
+  linkerd_annotations = {
+    "config.linkerd.io/proxy-cpu-limit"      = "0.75"
+    "config.linkerd.io/proxy-cpu-request"    = "0.2"
+    "config.linkerd.io/proxy-memory-limit"   = "768Mi"
+    "config.linkerd.io/proxy-memory-request" = "128Mi"
+  }
+
+  ingress_annotations = {
+    none = {}
+    traefik = {
+      "kubernetes.io/ingress.class" = "traefik"
+      /*"traefik.ingress.kubernetes.io/redirect-entry-point" = "https"
+      "traefik.ingress.kubernetes.io/redirect-permanent"   = "true"
+      "ingress.kubernetes.io/ssl-redirect"                 = "true"
+      "ingress.kubernetes.io/ssl-temporary-redirect"       = "false"*/
+    }
+  }
+
+  # This set of variables is to allow single containers with no "complex map" structure, to increase readability.
+  # This is quite complex and with a lot of "terraformisms" but it works
+
   image = try(
     { (var.name) = tostring(var.image) },
     var.image,
@@ -124,23 +145,7 @@ locals {
   volumes_mounts_from_config_map    = try(local.single_container ? { (var.name) = var.volumes_mounts_from_config_map } : tomap(false), var.volumes_mounts_from_config_map)
   volumes_mounts_from_secret        = try(local.single_container ? { (var.name) = var.volumes_mounts_from_secret } : tomap(false), var.volumes_mounts_from_secret)
 
-  linkerd_annotations = {
-    "config.linkerd.io/proxy-cpu-limit"      = "0.75"
-    "config.linkerd.io/proxy-cpu-request"    = "0.2"
-    "config.linkerd.io/proxy-memory-limit"   = "768Mi"
-    "config.linkerd.io/proxy-memory-request" = "128Mi"
-  }
-
-  ingress_annotations = {
-    none = {}
-    traefik = {
-      "kubernetes.io/ingress.class" = "traefik"
-      /*"traefik.ingress.kubernetes.io/redirect-entry-point" = "https"
-      "traefik.ingress.kubernetes.io/redirect-permanent"   = "true"
-      "ingress.kubernetes.io/ssl-redirect"                 = "true"
-      "ingress.kubernetes.io/ssl-temporary-redirect"       = "false"*/
-    }
-  }
+  # This set of variables merges all containers ports and volumes to assign them to the pod
 
   ports_list = flatten([
     for container, portmap in local.ports : [
