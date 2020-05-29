@@ -1,6 +1,6 @@
 # Terraform module Kubernetes application
 
-This is a module that deploy an opiniated kubernetes application, for instance a Deployment and its associated resources (service, service account, hpa, ingress).
+This is a module that deploys an opinionated kubernetes application, consisting of a Deployment and its associated resources (service, service account, hpa, ingress).
 
 The goal is to provide a "Helm like" terraform module, allowing simple k8s deployments with no need to reinvent the wheel or duplicate the code too much.
 
