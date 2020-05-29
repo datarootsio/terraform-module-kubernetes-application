@@ -8,6 +8,7 @@ The goal is to provide a "Helm like" terraform module, allowing simple k8s deplo
 [![Terraform 0.12](https://img.shields.io/badge/terraform-0.12-%23623CE4)](https://www.terraform.io)
 [![Terraform Registry](https://img.shields.io/badge/terraform-registry-%23623CE4)](https://registry.terraform.io/modules/datarootsio/kubernetes-application/module/)
 [![tests](https://github.com/datarootsio/terraform-module-kubernetes-application/workflows/tests/badge.svg?branch=master)](https://github.com/datarootsio/terraform-module-kubernetes-application/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/datarootsio/terraform-module-kubernetes-application)](https://goreportcard.com/report/github.com/datarootsio/terraform-module-kubernetes-application)
 
 ## Modules variables considerations
 
