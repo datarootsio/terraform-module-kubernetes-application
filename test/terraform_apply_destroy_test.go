@@ -120,6 +120,30 @@ func TestApplyAndDestroyWithSingleContainer(t *testing.T) {
         "type":"tcp_socket",
 	}
 
+    options.Vars["environment_variables_from_secret"] = map[string]interface{}{
+        "SUPER_SECRET": map[string]interface{}{
+            "secret_name":"test-secret",
+            "secret_key":"username",
+        },
+	}
+
+	options.Vars["environment_variables"] = map[string]interface{}{
+        "SUPER_VARIABLE":"super-value",
+	}
+
+    options.Vars["volumes_mounts_from_config_map"] = map[string]interface{}{
+        "test-configmap": map[string]interface{}{
+            "mount_path":"/data/myconfigmap",
+            "sub_path":"",
+        },
+	}
+
+    options.Vars["volumes_mounts_from_secret"] = map[string]interface{}{
+        "test-secret": map[string]interface{}{
+            "mount_path":"/data/mysecret",
+            "sub_path":"",
+        },
+	}
 
 	defer terraform.Destroy(t, options)
 	_, err = terraform.InitAndApplyE(t, options)
@@ -210,6 +234,24 @@ func TestApplyAndDestroyWithPlentyOfValues(t *testing.T) {
                 "port":80,
             },
             "type":"tcp_socket",
+        },
+	}
+
+    options.Vars["volumes_mounts_from_config_map"] = map[string]interface{}{
+        "test-container": map[string]interface{}{
+            "test-configmap": map[string]interface{}{
+                "mount_path":"/data/myconfigmap",
+                "sub_path":"",
+            },
+        },
+	}
+
+    options.Vars["volumes_mounts_from_secret"] = map[string]interface{}{
+        "test-container-2": map[string]interface{}{
+            "test-secret": map[string]interface{}{
+                "mount_path":"/data/mysecret",
+                "sub_path":"",
+            },
         },
 	}
 

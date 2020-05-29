@@ -184,7 +184,7 @@ locals {
   }
 
   volumes_from_secret_list = flatten([
-    for container, volume_map in var.volumes_mounts_from_secret : [
+    for container, volume_map in local.volumes_mounts_from_secret : [
       for volume, content in volume_map : {
         "${container}-${volume}" = volume
       }
