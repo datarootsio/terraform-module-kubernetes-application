@@ -101,6 +101,29 @@ variable "hpa" {
 
 locals {
 
+  image = try(
+    { (var.name) = tostring(var.image) },
+    var.image,
+  )
+
+  single_container = can(tostring(var.image))
+
+  args = try(
+    { (var.name) = tolist(var.args) },
+    var.args
+  )
+
+  ports                             = try(local.single_container ? { (var.name) = var.ports } : tomap(false), var.ports)
+  readiness_probes                  = try(local.single_container ? { (var.name) = var.readiness_probes } : tomap(false), var.readiness_probes)
+  liveness_probes                   = try(local.single_container ? { (var.name) = var.liveness_probes } : tomap(false), var.liveness_probes)
+  environment_variables_from_secret = try(local.single_container ? { (var.name) = var.environment_variables_from_secret } : tomap(false), var.environment_variables_from_secret)
+  environment_variables             = try(local.single_container ? { (var.name) = var.environment_variables } : tomap(false), var.environment_variables)
+  resources_requests                = try(local.single_container ? { (var.name) = var.resources_requests } : tomap(false), var.resources_requests)
+  resources_limits                  = try(local.single_container ? { (var.name) = var.resources_limits } : tomap(false), var.resources_limits)
+  volume_mounts                     = try(local.single_container ? { (var.name) = var.volume_mounts } : tomap(false), var.volume_mounts)
+  volumes_mounts_from_config_map    = try(local.single_container ? { (var.name) = var.volumes_mounts_from_config_map } : tomap(false), var.volumes_mounts_from_config_map)
+  volumes_mounts_from_secret        = try(local.single_container ? { (var.name) = var.volumes_mounts_from_secret } : tomap(false), var.volumes_mounts_from_secret)
+
   linkerd_annotations = {
     "config.linkerd.io/proxy-cpu-limit"      = "0.75"
     "config.linkerd.io/proxy-cpu-request"    = "0.2"
@@ -120,7 +143,7 @@ locals {
   }
 
   ports_list = flatten([
-    for container, portmap in var.ports : [
+    for container, portmap in local.ports : [
       for port, content in portmap : {
         "${container}-${port}" = merge(content, { "port" = port })
       }
@@ -132,7 +155,7 @@ locals {
   }
 
   volumes_list = flatten([
-    for container, volume_map in var.volume_mounts : [
+    for container, volume_map in local.volume_mounts : [
       for volume, content in volume_map : {
         "${container}-${volume}" = volume
       }
@@ -144,7 +167,7 @@ locals {
   }
 
   volumes_from_config_map_list = flatten([
-    for container, volume_map in var.volumes_mounts_from_config_map : [
+    for container, volume_map in local.volumes_mounts_from_config_map : [
       for volume, content in volume_map : {
         "${container}-${volume}" = volume
       }
