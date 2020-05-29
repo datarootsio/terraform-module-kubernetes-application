@@ -1,6 +1,6 @@
 # Terraform module Kubernetes application
 
-This is a module that deploy an opiniated kubernetes application, for instance a Deployment and its associated resources (service, service account, hpa, ingress).
+This is a module that deploys an opinionated kubernetes application, consisting of a Deployment and its associated resources (service, service account, hpa, ingress).
 
 The goal is to provide a "Helm like" terraform module, allowing simple k8s deployments with no need to reinvent the wheel or duplicate the code too much.
 
@@ -635,3 +635,19 @@ Plan: 5 to add, 0 to change, 0 to destroy.
 
 No output.
 
+## Contributing
+
+Contributions to this repository are very welcome! Found a bug or do you have a suggestion? Please open an issue. Do you know how to fix it? Pull requests are welcome as well! To get you started faster, a Makefile is provided.
+
+Make sure to install [Terraform](https://learn.hashicorp.com/terraform/getting-started/install.html), [Go](https://golang.org/doc/install) (for automated testing) and Make (optional, if you want to use the Makefile) on your computer. Install [tflint](https://github.com/terraform-linters/tflint) to be able to run the linting.
+
+* Setup tools & dependencies: `make tools`
+* Format your code: `make fmt`
+* Linting: `make lint`
+* Run tests: `make test` (or `go test -timeout 2h ./...` without Make)
+
+To run the automated tests, the environment variable `ARM_SUBSCRIPTION_ID` has to be set to your Azure subscription ID.
+
+## License
+
+MIT license. Please see [LICENSE](LICENSE.md) for details.

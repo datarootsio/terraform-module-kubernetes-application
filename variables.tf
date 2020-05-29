@@ -62,13 +62,11 @@ variable "image_pull_secrets" {
 variable "liveness_probes" {
   description = "Map of liveness probes per container. Pass the regular terraform object as is : https://www.terraform.io/docs/providers/kubernetes/r/deployment.html#liveness_probe-1"
   type        = any
-  default     = {}
 }
 
 variable "readiness_probes" {
   description = "Map of readiness probes per container. Pass the regular terraform object as is : https://www.terraform.io/docs/providers/kubernetes/r/deployment.html#readiness_probe-1"
   type        = any
-  default     = {}
 }
 
 variable "volume_mounts" {
