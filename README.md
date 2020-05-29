@@ -1,6 +1,6 @@
 # Terraform module Kubernetes application
 
-This is a module that deploy an opiniated kubernetes application, i.e. a Deployment and its associated resources (service, service account, hpa, ingress).
+This is a module that deploy an opiniated kubernetes application, for instance a Deployment and its associated resources (service, service account, hpa, ingress).
 
 The goal is to provide a "Helm like" terraform module, allowing simple k8s deployments with no need to reinvent the wheel or duplicate the code too much.
 
@@ -13,7 +13,7 @@ The goal is to provide a "Helm like" terraform module, allowing simple k8s deplo
 
 This module is intended to be as generic as possible. As it's not possible to know all the specific values upfront, all variables of this module are of type `any`. This is needed to allow creation of complex maps for the values. Also, kubernetes allows multiple containers per pods, each one with its own values, variables, etc.
 
-All the documentation of this module will show multi-container variables. If you deployment only uses a single container, it is possible to omit the container name and it will still work.
+All the documentation of this module will show multi-container variables. If your deployment only uses a single container, it is possible to omit the container name and it will still work.
 
 For instance, you can use either this syntax :
 
@@ -253,9 +253,22 @@ module "my_super_application" {
   ports = {
     "my-image" = {
       "5000" = {
-        "protocol" = "TCP"
+        "protocol"                    = "TCP"
+        "ingress"                     = "foo.example.com"
+        "default_ingress_annotations" = "traefik"
+        "cert_manager_issuer"         = "letsencrypt-prod"
+        "ingress_annotations" = {
+          "foo.annotations.io" = "bar"
+        }
       }
     }
+  }
+
+  hpa = {
+    enabled      = true
+    target_cpu   = 50
+    min_replicas = 4
+    max_replicas = 20
   }
 
   environment_variables_from_secret = {
@@ -304,6 +317,317 @@ module "my_super_application" {
     }
   }
 }
+```
+
+## Resulting plan
+
+```
+Terraform will perform the following actions:
+
+  # module.my_super_application.kubernetes_deployment.container will be created
+  + resource "kubernetes_deployment" "container" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + labels           = {
+              + "app" = "some-name"
+            }
+          + name             = "some-name"
+          + namespace        = "my-namespace"
+        }
+
+      + spec {
+          + min_ready_seconds         = 0
+          + paused                    = false
+          + progress_deadline_seconds = 600
+          + replicas                  = 1
+          + revision_history_limit    = 10
+
+          + selector {
+              + match_labels = {
+                  + "app" = "some-name"
+                }
+            }
+
+          + template {
+              + metadata {
+                  + annotations      = {
+                      + "config.linkerd.io/proxy-cpu-limit"      = "0.75"
+                      + "config.linkerd.io/proxy-cpu-request"    = "0.2"
+                      + "config.linkerd.io/proxy-memory-limit"   = "768Mi"
+                      + "config.linkerd.io/proxy-memory-request" = "128Mi"
+                    }
+                  + generation       = (known after apply)
+                  + labels           = {
+                      + "app" = "some-name"
+                    }
+                }
+
+              + spec {
+                  + automount_service_account_token  = true
+                  + dns_policy                       = "ClusterFirst"
+                  + host_ipc                         = false
+                  + host_network                     = false
+                  + host_pid                         = false
+                  + hostname                         = (known after apply)
+                  + node_name                        = (known after apply)
+                  + restart_policy                   = "Always"
+                  + service_account_name             = "some-name"
+                  + share_process_namespace          = false
+                  + termination_grace_period_seconds = 30
+
+                  + container {
+                      + args                     = []
+                      + image                    = "someimage:v1"
+                      + image_pull_policy        = (known after apply)
+                      + name                     = "my-image"
+                      + stdin                    = false
+                      + stdin_once               = false
+                      + termination_message_path = "/dev/termination-log"
+                      + tty                      = false
+
+                      + env {
+                          + name  = "LOG_LEVEL"
+                          + value = "debug"
+                        }
+                      + env {
+                          + name  = "USERNAME"
+                          + value = "user"
+                        }
+                      + env {
+                          + name = "PASSWORD"
+
+                          + value_from {
+
+                              + secret_key_ref {
+                                  + key  = "password"
+                                  + name = "my-secret"
+                                }
+                            }
+                        }
+                      + env {
+                          + name = "SECRET_URL"
+
+                          + value_from {
+
+                              + secret_key_ref {
+                                  + key  = "secret-url"
+                                  + name = "my-secret"
+                                }
+                            }
+                        }
+
+                      + liveness_probe {
+                          + failure_threshold     = 3
+                          + initial_delay_seconds = 15
+                          + period_seconds        = 10
+                          + success_threshold     = 1
+                          + timeout_seconds       = 5
+
+                          + http_get {
+                              + path   = "/nginx_status"
+                              + port   = "80"
+                              + scheme = "HTTP"
+                            }
+                        }
+
+                      + port {
+                          + container_port = 5000
+                          + protocol       = "TCP"
+                        }
+
+                      + readiness_probe {
+                          + failure_threshold     = 3
+                          + initial_delay_seconds = 15
+                          + period_seconds        = 10
+                          + success_threshold     = 1
+                          + timeout_seconds       = 5
+
+                          + tcp_socket {
+                              + port = "5000"
+                            }
+                        }
+
+                      + resources {
+                          + limits {
+                              + cpu    = "0.2"
+                              + memory = "256Mi"
+                            }
+
+                          + requests {
+                              + cpu    = "0.1"
+                              + memory = "128Mi"
+                            }
+                        }
+
+                      + volume_mount {
+                          + mount_path        = (known after apply)
+                          + mount_propagation = (known after apply)
+                          + name              = (known after apply)
+                          + read_only         = (known after apply)
+                          + sub_path          = (known after apply)
+                        }
+                    }
+
+                  + image_pull_secrets {
+                      + name = (known after apply)
+                    }
+
+                  + volume {
+                      + name = (known after apply)
+
+                      + config_map {
+                          + default_mode = (known after apply)
+                          + name         = (known after apply)
+
+                          + items {
+                              + key  = (known after apply)
+                              + mode = (known after apply)
+                              + path = (known after apply)
+                            }
+                        }
+
+                      + secret {
+                          + default_mode = (known after apply)
+                          + optional     = (known after apply)
+                          + secret_name  = (known after apply)
+
+                          + items {
+                              + key  = (known after apply)
+                              + mode = (known after apply)
+                              + path = (known after apply)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+  # module.my_super_application.kubernetes_horizontal_pod_autoscaler.hpa["hpa"] will be created
+  + resource "kubernetes_horizontal_pod_autoscaler" "hpa" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + labels           = {
+              + "app" = "some-name"
+            }
+          + name             = "some-name"
+          + namespace        = "my-namespace"
+        }
+
+      + spec {
+          + max_replicas                      = 20
+          + min_replicas                      = 4
+          + target_cpu_utilization_percentage = 50
+
+          + scale_target_ref {
+              + api_version = "apps/v1"
+              + kind        = "Deployment"
+              + name        = "some-name"
+            }
+        }
+    }
+
+  # module.my_super_application.kubernetes_ingress.ingress["my-image-5000"] will be created
+  + resource "kubernetes_ingress" "ingress" {
+      + id                     = (known after apply)
+      + load_balancer_ingress  = (known after apply)
+      + wait_for_load_balancer = false
+
+      + metadata {
+          + annotations      = {
+              + "cert-manager.io/issuer"      = "letsencrypt-prod"
+              + "foo.annotations.io"          = "bar"
+              + "kubernetes.io/ingress.class" = "traefik"
+            }
+          + generation       = (known after apply)
+          + name             = "some-name-my-image-5000"
+          + namespace        = "my-namespace"
+          + resource_version = (known after apply)
+          + self_link        = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + spec {
+
+          + rule {
+              + host = "foo.example.com"
+
+              + http {
+                  + path {
+                      + backend {
+                          + service_name = "some-name"
+                          + service_port = "5000"
+                        }
+                    }
+                }
+            }
+
+          + tls {
+              + hosts       = [
+                  + "foo.example.com",
+                ]
+              + secret_name = "some-name-my-image-5000"
+            }
+        }
+    }
+
+  # module.my_super_application.kubernetes_service.k8s_service will be created
+  + resource "kubernetes_service" "k8s_service" {
+      + id                    = (known after apply)
+      + load_balancer_ingress = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + labels           = {
+              + "app" = "some-name"
+            }
+          + name             = "some-name"
+          + namespace        = "my-namespace"
+        }
+
+      + spec {
+          + cluster_ip                  = (known after apply)
+          + external_traffic_policy     = (known after apply)
+          + publish_not_ready_addresses = false
+          + selector                    = {
+              + "app" = "some-name"
+            }
+          + session_affinity            = "None"
+          + type                        = "ClusterIP"
+
+          + port {
+              + name        = "tcp-5000"
+              + node_port   = (known after apply)
+              + port        = 5000
+              + protocol    = "TCP"
+              + target_port = "5000"
+            }
+        }
+    }
+
+  # module.my_super_application.kubernetes_service_account.serviceaccount will be created
+  + resource "kubernetes_service_account" "serviceaccount" {
+      + automount_service_account_token = true
+      + default_secret_name             = (known after apply)
+      + id                              = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + labels           = {
+              + "app" = "some-name"
+            }
+          + name             = "some-name"
+          + namespace        = "my-namespace"
+        }
+    }
+
+Plan: 5 to add, 0 to change, 0 to destroy.
+
+------------------------------------------------------------------------
 ```
 
 ## Outputs
