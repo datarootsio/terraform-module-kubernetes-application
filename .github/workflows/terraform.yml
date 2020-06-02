@@ -55,7 +55,7 @@ jobs:
       - name: "go test"
         env:
           K3S_KUBECONFIG_MODE: 644
-          KUBECONFIG: "~/.kube/config:/etc/rancher/k3s/k3s.yaml"
+          KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
         run: |
           curl -sfL https://get.k3s.io | sh -s -
           go test -timeout ${{ env.tests_timeout }} ./...
