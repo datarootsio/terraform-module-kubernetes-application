@@ -143,6 +143,7 @@ ports = {
       "ingress"                     = "foo.example.com"
       "default_ingress_annotations" = "traefik"
       "cert_manager_issuer"         = "letsencrypt-prod"
+      "path"                        = "/api/v1"
       "ingress_annotations" = {
         "foo.annotations.io" = "bar"
       }
