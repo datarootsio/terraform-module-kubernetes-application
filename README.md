@@ -646,7 +646,7 @@ Make sure to install [Terraform](https://learn.hashicorp.com/terraform/getting-s
 * Linting: `make lint`
 * Run tests: `make test` (or `go test -timeout 2h ./...` without Make)
 
-To run the automated tests, you need to be logged in to a kubernetes cluster. In a future release, we will mock the requests to avoid this dependency.
+To run the automated tests, you need to be logged in to a kubernetes cluster. We use [k3s](https://k3s.io/) in the test pipelines.
 
 ## License
 

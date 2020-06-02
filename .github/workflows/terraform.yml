@@ -32,15 +32,13 @@ jobs:
     name: "Tests"
     runs-on: ubuntu-latest
     steps:
-      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
-        with:
-          version: '290.0.1'
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GOOGLE_CLOUD_KEYFILE_JSON }}
-          export_default_credentials: true
+ #       with:
+ #         version: '290.0.1'
+ #         project_id: ${{ secrets.GCP_PROJECT_ID }}
+ #         service_account_key: ${{ secrets.GOOGLE_CLOUD_KEYFILE_JSON }}
+ #         export_default_credentials: true
 
-      - run: gcloud container clusters get-credentials validation-cluster --region europe-west1 --project ${{ secrets.GCP_PROJECT_ID }}
-
+ #     - run: gcloud container clusters get-credentials validation-cluster --region europe-west1 --project ${{ secrets.GCP_PROJECT_ID }}
       - name: "Checkout"
         uses: actions/checkout@master
 
@@ -50,7 +48,14 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v1
         with:
+          # Optional: golangci-lint command line arguments.
+          args: --timeout=3m0s
           version: ${{ env.golangci_lint_version }}
 
       - name: "go test"
-        run: go test -timeout ${{ env.tests_timeout }} ./...
+        env:
+          K3S_KUBECONFIG_MODE: 644
+          KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
+        run: |
+          curl -sfL https://get.k3s.io | sh -s -
+          go test -timeout ${{ env.tests_timeout }} ./...
