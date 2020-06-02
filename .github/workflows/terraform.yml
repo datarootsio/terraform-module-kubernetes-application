@@ -32,7 +32,6 @@ jobs:
     name: "Tests"
     runs-on: ubuntu-latest
     steps:
- #     - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
  #       with:
  #         version: '290.0.1'
  #         project_id: ${{ secrets.GCP_PROJECT_ID }}
@@ -40,9 +39,6 @@ jobs:
  #         export_default_credentials: true
 
  #     - run: gcloud container clusters get-credentials validation-cluster --region europe-west1 --project ${{ secrets.GCP_PROJECT_ID }}
-
-      - run: curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" sh -s -
-
       - name: "Checkout"
         uses: actions/checkout@master
 
@@ -55,4 +51,6 @@ jobs:
           version: ${{ env.golangci_lint_version }}
 
       - name: "go test"
-        run: go test -timeout ${{ env.tests_timeout }} ./...
+        run: |
+          curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" sh -s -
+          go test -timeout ${{ env.tests_timeout }} ./...
