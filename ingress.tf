@@ -34,6 +34,7 @@ resource "kubernetes_ingress" "ingress" {
             service_name = var.name
             service_port = each.value["port"]
           }
+          path = lookup(each.value, "path", "")
         }
       }
     }
