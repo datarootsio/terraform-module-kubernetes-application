@@ -132,7 +132,7 @@ image = {
 ### ports
 
 For each container, you can add map of maps. At minima, you need to provide the protocol. Each pair of protocol-port will be used to create a service.
-If you add an ingress name, the corresponding object will be created. You can also choose a cert-manager issuer (refer to the issuers present at the namespace level).
+If you add an ingress map, with the format `{"hostname":"path"}`. You can also choose a cert-manager issuer (refer to the issuers present at the namespace level).
 You can add annotations, and choose a default set of annotations (currently only traefik is supported)
 
 ```hcl
@@ -140,10 +140,12 @@ ports = {
   "container-a" = {
     "3000" = {
       "protocol"                    = "TCP"
-      "ingress"                     = "foo.example.com"
+      "ingress"                     = {
+        "foo.example.com": "/"
+        "bar.example.com": "/"
+      }
       "default_ingress_annotations" = "traefik"
       "cert_manager_issuer"         = "letsencrypt-prod"
-      "path"                        = "/api/v1"
       "ingress_annotations" = {
         "foo.annotations.io" = "bar"
       }

@@ -175,8 +175,11 @@ func TestApplyAndDestroyWithPlentyOfValues(t *testing.T) {
 				"protocol": "TCP",
 			},
 			"6000": map[string]interface{}{
-				"protocol":                    "TCP",
-				"ingress":                     "foo.example.com",
+				"protocol": "TCP",
+				"ingress": map[string]interface{}{
+					"foo.example.com": "/",
+					"bar.example.com": "/",
+				},
 				"default_ingress_annotations": "traefik",
 				"cert_manager_issuer":         "letsencrypt-prod",
 				"path":                        "/api/v1",
