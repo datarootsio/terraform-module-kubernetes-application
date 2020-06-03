@@ -16,8 +16,10 @@ args = {
 ports = {
   "container-a" = {
     "3000" = {
-      "protocol"                    = "TCP"
-      "ingress"                     = "foo.example.com"
+      "protocol" = "TCP"
+      "ingress" = {
+        "foo.example.com" : "/"
+      }
       "default_ingress_annotations" = "traefik"
       "cert_manager_issuer"         = "letsencrypt-prod"
       "ingress_annotations" = {

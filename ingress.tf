@@ -3,7 +3,7 @@ resource "kubernetes_ingress" "ingress" {
   for_each = {
     for key, value in local.ports_map :
     key => value
-    if lookup(value, "ingress", "") != ""
+    if length(lookup(value, "ingress", [])) > 0
   }
 
   metadata {
@@ -18,23 +18,27 @@ resource "kubernetes_ingress" "ingress" {
 
   spec {
     dynamic "tls" {
-      for_each = lookup(each.value, "cert_manager_issuer", "") == "" ? [] : [lookup(each.value, "cert_manager_issuer", "")]
+      for_each = lookup(each.value, "cert_manager_issuer", "") == "" ? [] : [
+      lookup(each.value, "cert_manager_issuer", "")]
       content {
-        hosts       = [each.value["ingress"]]
+        hosts       = keys(each.value["ingress"])
         secret_name = "${var.name}-${each.key}"
       }
     }
 
-    rule {
-      host = each.value["ingress"]
+    dynamic "rule" {
+      for_each = each.value["ingress"]
+      content {
+        host = rule.key
 
-      http {
-        path {
-          backend {
-            service_name = var.name
-            service_port = each.value["port"]
+        http {
+          path {
+            backend {
+              service_name = var.name
+              service_port = each.value["port"]
+            }
+            path = rule.value
           }
-          path = lookup(each.value, "path", "/")
         }
       }
     }
