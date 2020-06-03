@@ -13,11 +13,39 @@ resource "kubernetes_horizontal_pod_autoscaler" "hpa" {
   spec {
     max_replicas = lookup(var.hpa, "max_replicas", 6)
     min_replicas = lookup(var.hpa, "min_replicas", 2)
+
     scale_target_ref {
-      api_version = "apps/v1"
+      api_version = "apps/v2beta2"
       kind        = "Deployment"
       name        = var.name
     }
-    target_cpu_utilization_percentage = lookup(var.hpa, "target_cpu", 80)
+
+    dynamic "metric" {
+      for_each = lookup(var.hpa, "target_cpu", "") != "" ? { "cpu" = "true" } : {}
+      content {
+        type = "Resource"
+        resource {
+          name = "cpu"
+          target {
+            type                = "Utilization"
+            average_utilization = lookup(var.hpa, "target_cpu", 100)
+          }
+        }
+      }
+    }
+
+    dynamic "metric" {
+      for_each = lookup(var.hpa, "target_memory", "") != "" ? { "memory" = "true" } : {}
+      content {
+        type = "Resource"
+        resource {
+          name = "memory"
+          target {
+            type                = "Utilization"
+            average_utilization = lookup(var.hpa, "target_memory", 100)
+          }
+        }
+      }
+    }
   }
 }

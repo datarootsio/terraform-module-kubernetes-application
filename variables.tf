@@ -89,6 +89,7 @@ variable "volumes_mounts_from_secret" {
 
 variable "hpa" {
   description = "settings for the horizontal pod autoscaler"
+  type        = any
   default = {
     enabled      = false
     target_cpu   = 80

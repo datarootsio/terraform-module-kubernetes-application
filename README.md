@@ -231,10 +231,11 @@ Allows to enable the horizontal pod autoscaler. Settings are self explanatory.
 
 ```hcl
 hpa = {
-  enabled      = true
-  target_cpu   = 50
-  min_replicas = 4
-  max_replicas = 20
+  enabled       = true
+  target_cpu    = 50
+  target_memory = 70
+  min_replicas  = 4
+  max_replicas  = 20
 }
 ```
 
