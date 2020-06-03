@@ -32,7 +32,7 @@ resource "kubernetes_deployment" "container" {
         service_account_name = kubernetes_service_account.serviceaccount.metadata.0.name
 
         dynamic "image_pull_secrets" {
-          for_each = var.image_pull_secrets
+          for_each = { for v in var.image_pull_secrets : v => v }
           content {
             name = image_pull_secrets.key
           }
