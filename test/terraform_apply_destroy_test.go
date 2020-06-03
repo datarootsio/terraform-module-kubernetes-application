@@ -112,6 +112,8 @@ func TestApplyAndDestroyWithSingleContainer(t *testing.T) {
 		"type": "tcp_socket",
 	}
 
+	options.Vars["image_pull_secrets"] = []string{"'my-secret'", "'my-other-secret'"}
+
 	options.Vars["liveness_probes"] = map[string]interface{}{
 		"tcp_socket": map[string]interface{}{
 			"port": 5000,
@@ -259,11 +261,11 @@ func TestApplyAndDestroyWithPlentyOfValues(t *testing.T) {
 	}
 
 	options.Vars["hpa"] = map[string]interface{}{
-		"enabled":        true,
+		"enabled":       true,
 		"target_cpu":    50,
 		"target_memory": 60,
 		"min_replicas":  1,
-		"max_replicas":   2,
+		"max_replicas":  2,
 	}
 
 	defer terraform.Destroy(t, options)

@@ -80,7 +80,7 @@ However, you have to be consistent across variables, you cannot mix styles.
 | environment\_variables\_from\_secret | Map of environment variables to inject in containers, from existing secrets.                                                                                            | `any`    | `{}`                                                                                                           |    no    |
 | hpa                                  | settings for the horizontal pod autoscaler                                                                                                                              | `map`    | <pre>{<br>  "enabled": false,<br>  "max_replicas": 6,<br>  "min_replicas": 2,<br>  "target_cpu": 80<br>}</pre> |    no    |
 | image                                | The image to deploy.                                                                                                                                                    | `map`    | n/a                                                                                                            |   yes    |
-| image\_pull\_secrets                 | Map of image pull secrets to use with the containers                                                                                                                    | `map`    | `{}`                                                                                                           |    no    |
+| image\_pull\_secrets                 | List of image pull secrets to use with the containers                                                                                                                    | `list`    | `[]`                                                                                                           |    no    |
 | liveness\_probes                     | Map of liveness probes per container. Pass the regular terraform object as is : https://www.terraform.io/docs/providers/kubernetes/r/deployment.html#liveness_probe-1   | `map`    | `{}`                                                                                                           |    no    |
 | name                                 | The name of the deployment. Will be used for all other resources                                                                                                        | `string` | n/a                                                                                                            |   yes    |
 | namespace                            | The namespace where this deployment will live. Must exists.                                                                                                             | `string` | n/a                                                                                                            |   yes    |
@@ -254,6 +254,8 @@ module "my_super_application" {
   image = {
     "my-image" = "someimage:v1"
   }
+
+  image_pull_secrets = ["my-super-secret"]
 
   ports = {
     "my-image" = {

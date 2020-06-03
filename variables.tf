@@ -55,8 +55,9 @@ variable "resources_requests" {
 }
 
 variable "image_pull_secrets" {
-  description = "Map of image pull secrets to use with the containers"
-  default     = {}
+  type        = list(string)
+  description = "List of image pull secrets to use with the containers"
+  default     = []
 }
 
 variable "liveness_probes" {
