@@ -258,6 +258,14 @@ func TestApplyAndDestroyWithPlentyOfValues(t *testing.T) {
 		},
 	}
 
+	options.Vars["hpa"] = map[string]interface{}{
+		"enabled":        true,
+		"target_cpu":    50,
+		"target_memory": 60,
+		"min_replicas":  1,
+		"max_replicas":   2,
+	}
+
 	defer terraform.Destroy(t, options)
 	_, err = terraform.InitAndApplyE(t, options)
 	assert.NoError(t, err)
