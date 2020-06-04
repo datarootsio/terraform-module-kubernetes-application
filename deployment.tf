@@ -21,7 +21,7 @@ resource "kubernetes_deployment" "container" {
           app = var.name
         }
         annotations = merge(
-          local.linkerd_annotations
+          local.linkerd_annotations,
         )
       }
 

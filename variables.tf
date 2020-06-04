@@ -13,6 +13,12 @@ variable "image" {
   description = "The image to deploy."
 }
 
+variable "inject_linkerd" {
+  type        = bool
+  default     = false
+  description = "Add the necessary annotations for linkerd injection"
+}
+
 variable "args" {
   type        = any
   description = "Arguments to pass to the container"
@@ -102,6 +108,7 @@ variable "hpa" {
 locals {
 
   linkerd_annotations = {
+    "linkerd.io/inject"                      = var.inject_linkerd ? "enabled" : "disabled",
     "config.linkerd.io/proxy-cpu-limit"      = "0.75"
     "config.linkerd.io/proxy-cpu-request"    = "0.2"
     "config.linkerd.io/proxy-memory-limit"   = "768Mi"
