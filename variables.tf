@@ -25,6 +25,11 @@ variable "args" {
   default     = {}
 }
 
+variable "command" {
+  type        = any
+  description = "Command that the container will run"
+  default     = {}
+}
 
 variable "ports" {
   description = "Map of ports to expose, and associated settings."
@@ -139,6 +144,11 @@ locals {
   args = try(
     { (var.name) = tolist(var.args) },
     var.args
+  )
+
+  command = try(
+    { (var.name) = tolist(var.command) },
+    var.command
   )
 
   ports                             = try(local.single_container ? { (var.name) = var.ports } : tomap(false), var.ports)
