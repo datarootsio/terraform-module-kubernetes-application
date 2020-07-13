@@ -123,3 +123,7 @@ volumes_mounts_from_secret = {
     }
   }
 }
+
+node_selector = {
+  "disktype" = "ssd"
+}
