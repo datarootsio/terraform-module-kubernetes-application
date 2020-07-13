@@ -268,6 +268,10 @@ func TestApplyAndDestroyWithPlentyOfValues(t *testing.T) {
 		"max_replicas":  2,
 	}
 
+	options.Vars["node_selector"] = map[string]interface{}{
+        "kubernetes.io/os": "linux",
+    }
+
 	defer terraform.Destroy(t, options)
 	_, err = terraform.InitAndApplyE(t, options)
 	assert.NoError(t, err)

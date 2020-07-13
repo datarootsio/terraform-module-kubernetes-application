@@ -31,6 +31,8 @@ resource "kubernetes_deployment" "container" {
 
         service_account_name = kubernetes_service_account.serviceaccount.metadata.0.name
 
+        node_selector = var.node_selector
+
         dynamic "image_pull_secrets" {
           for_each = { for v in var.image_pull_secrets : v => v }
           content {

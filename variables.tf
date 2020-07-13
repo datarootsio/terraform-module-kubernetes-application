@@ -99,6 +99,12 @@ variable "volumes_mounts_from_secret" {
   default     = {}
 }
 
+variable "node_selector" {
+  description = "Map of labels and values for node selection"
+  type        = map(string)
+  default     = {}
+}
+
 variable "hpa" {
   description = "settings for the horizontal pod autoscaler"
   type        = any
