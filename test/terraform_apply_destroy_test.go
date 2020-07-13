@@ -269,7 +269,7 @@ func TestApplyAndDestroyWithPlentyOfValues(t *testing.T) {
 	}
 
 	options.Vars["node_selector"] = map[string]interface{}{
-        "kubernetes.io/os": "linux"
+        "kubernetes.io/os": "linux",
     }
 
 	defer terraform.Destroy(t, options)
