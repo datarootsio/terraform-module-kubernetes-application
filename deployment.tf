@@ -15,6 +15,17 @@ resource "kubernetes_deployment" "container" {
       }
     }
 
+    strategy {
+      type = var.strategy
+      dynamic "rolling_update" {
+        for_each = var.strategy == "RollingUpdate" ? ["rolling_update"] : []
+        content {
+          max_surge       = var.max_surge
+          max_unavailable = var.max_unavailable
+        }
+      }
+    }
+
     replicas = var.replicas
 
     template {
