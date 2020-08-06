@@ -91,6 +91,7 @@ However, you have to be consistent across variables, you cannot mix styles.
 | max_unavailable                      | Maximum number of pods that can be unavailable during update.                                                                                                           | `string`            | `25%`                                                                                                          |    no    |
 | name                                 | The name of the deployment. Will be used for all other resources                                                                                                        | `string`            | n/a                                                                                                            |   yes    |
 | namespace                            | The namespace where this deployment will live. Must exists.                                                                                                             | `string`            | n/a                                                                                                            |   yes    |
+| node\_affinity                       | Definition of the node affinity. See below                                                                                                                              | `any`               | `{}`                                                                                                           |    no    |
 | node\_selector                       | Map of labels and values for node selection                                                                                                                             | `map(string)`       | `{}`                                                                                                           |    no    |
 | ports                                | Map of ports to expose, and associated settings.                                                                                                                        | `any`               | `{}`                                                                                                           |    no    |
 | readiness\_probes                    | Map of readiness probes per container. Pass the regular terraform object as is : https://www.terraform.io/docs/providers/kubernetes/r/deployment.html#readiness_probe-1 | `any`               | n/a                                                                                                            |   yes    |
@@ -235,6 +236,47 @@ readiness_probes = {
     initial_delay_seconds = 3
     period_seconds        = 3
   }
+}
+```
+
+### Node affinity
+
+This block allows to define node affinity of the pod. You can see the settings here : https://www.terraform.io/docs/providers/kubernetes/r/deployment.html#affinity-1
+
+We cannot pass blocks as is so you have to create a map from it (aka adding the `=` sign)
+
+```hcl
+node_affinity = {
+  required_during_scheduling_ignored_during_execution = [
+    {
+      node_selector_term = [
+        {
+          match_expressions = [
+            {
+              key      = "kubernetes.io/os"
+              operator = "In"
+              values = [
+              "linux"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+  preferred_during_scheduling_ignored_during_execution = [
+    {
+      weight = 1
+      preference = {
+        match_expressions = [
+          {
+            key      = "kubernetes.io/os"
+            operator = "In"
+            values   = ["linux"]
+          }
+        ]
+      }
+    }
+  ]
 }
 ```
 

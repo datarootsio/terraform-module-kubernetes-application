@@ -148,6 +148,21 @@ variable "hpa" {
   }
 }
 
+variable "node_affinity" {
+  type    = any
+  default = {}
+}
+
+variable "pod_affinity" {
+  type    = any
+  default = {}
+}
+
+variable "pod_anti_affinity" {
+  type    = any
+  default = {}
+}
+
 locals {
 
   linkerd_annotations = {

@@ -45,6 +45,48 @@ resource "kubernetes_deployment" "container" {
           }
         }
 
+        affinity {
+          dynamic "node_affinity" {
+            for_each = length(var.node_affinity) > 0 ? ["node_affinity"] : []
+            content {
+              dynamic "preferred_during_scheduling_ignored_during_execution" {
+                for_each = { for v in lookup(var.node_affinity, "preferred_during_scheduling_ignored_during_execution", []) : uuid() => v }
+                content {
+                  weight = preferred_during_scheduling_ignored_during_execution.value["weight"]
+                  preference {
+                    dynamic "match_expressions" {
+                      for_each = { for v in lookup(preferred_during_scheduling_ignored_during_execution.value["preference"], "match_expressions", []) : uuid() => v }
+                      content {
+                        key      = match_expressions.value["key"]
+                        operator = match_expressions.value["operator"]
+                        values   = lookup(match_expressions.value, "values", [])
+                      }
+                    }
+                  }
+                }
+              }
+              dynamic "required_during_scheduling_ignored_during_execution" {
+                for_each = { for v in lookup(var.node_affinity, "required_during_scheduling_ignored_during_execution", []) : uuid() => v }
+                content {
+                  dynamic "node_selector_term" {
+                    for_each = { for v in lookup(required_during_scheduling_ignored_during_execution.value, "node_selector_term", []) : uuid() => v }
+                    content {
+                      dynamic "match_expressions" {
+                        for_each = { for v in lookup(node_selector_term.value, "match_expressions", []) : uuid() => v }
+                        content {
+                          key      = match_expressions.value["key"]
+                          operator = match_expressions.value["operator"]
+                          values   = lookup(match_expressions.value, "values", [])
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
         automount_service_account_token = true
 
         service_account_name = kubernetes_service_account.serviceaccount.metadata.0.name
