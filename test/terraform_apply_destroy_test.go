@@ -89,7 +89,7 @@ func TestApplyAndDestroyWithDefaultValues(t *testing.T) {
 	pod := pods[0]
 	container := pod.Spec.Containers[0]
 
-    assert.Equal(t,len(pods),2)
+	assert.Equal(t, len(pods), 2)
 	assert.Equal(t, "training/webapp:latest", container.Image)
 	assert.NotContains(t, pod.ObjectMeta.Annotations, "linkerd.io/inject")
 	assert.Contains(t, pod.ObjectMeta.Annotations, "foo")
@@ -135,6 +135,10 @@ func TestApplyAndDestroyWithSingleContainer(t *testing.T) {
 
 	options.Vars["image_pull_secrets"] = []string{"'my-secret'", "'my-other-secret'"}
 
+	options.Vars["host_aliases"] = map[string]interface{}{
+		"127.0.0.1": []string{"foo.bar", "bar.baz"},
+	}
+
 	options.Vars["liveness_probes"] = map[string]interface{}{
 		"tcp_socket": map[string]interface{}{
 			"port": 5000,
@@ -176,12 +180,14 @@ func TestApplyAndDestroyWithSingleContainer(t *testing.T) {
 	pod := pods[0]
 	container := pod.Spec.Containers[0]
 
-    assert.Equal(t,len(pods),1)
+	assert.Equal(t, len(pods), 1)
 	assert.Equal(t, "training/webapp:latest", container.Image)
 	assert.Contains(t, pod.ObjectMeta.Annotations, "linkerd.io/inject")
 	assert.Contains(t, pod.ObjectMeta.Annotations, "foo")
 	assert.Contains(t, pod.ObjectMeta.Annotations, "bar")
 	assert.Equal(t, "bar", pod.ObjectMeta.Annotations["foo"])
+    assert.EqualValues(t, "127.0.0.1", pod.Spec.HostAliases[0].IP)
+    assert.EqualValues(t, []string{"foo.bar","bar.baz"}, pod.Spec.HostAliases[0].Hostnames)
 	assert.Equal(t, "enabled", pod.ObjectMeta.Annotations["linkerd.io/inject"])
 }
 

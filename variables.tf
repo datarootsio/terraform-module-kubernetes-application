@@ -25,6 +25,11 @@ variable "inject_linkerd" {
   description = "Add the necessary annotations for linkerd injection"
 }
 
+variable "host_aliases" {
+  type    = map(list(string))
+  default = {}
+}
+
 variable "args" {
   type        = any
   description = "Arguments to pass to the container"
