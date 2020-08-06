@@ -13,6 +13,12 @@ variable "image" {
   description = "The image to deploy."
 }
 
+variable "replicas" {
+  type        = number
+  default     = 1
+  description = "The number of replicas."
+}
+
 variable "inject_linkerd" {
   type        = bool
   default     = false
