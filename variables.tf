@@ -8,6 +8,21 @@ variable "namespace" {
   description = "The namespace where this deployment will live. Must exists."
 }
 
+variable "strategy" {
+  type    = string
+  default = "RollingUpdate"
+}
+
+variable "max_unavailable" {
+  type    = string
+  default = "25%"
+}
+
+variable "max_surge" {
+  type    = string
+  default = "25%"
+}
+
 variable "image" {
   type        = any
   description = "The image to deploy."

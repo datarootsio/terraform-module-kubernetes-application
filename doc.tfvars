@@ -47,6 +47,12 @@ host_aliases = {
   "8.8.8.8"   = ["bar.baz", "baz.qux"]
 }
 
+strategy = "RollingUpdate"
+
+max_surge = "50%"
+
+max_unavailable = "50%"
+
 environment_variables_from_secret = {
   "container-a" = {
     "FOO_SECRET" = {

@@ -52,6 +52,9 @@ func TestApplyAndDestroyWithDefaultValues(t *testing.T) {
 
 	options.Vars["image"] = map[string]interface{}{"test-container": "training/webapp:latest"}
 	options.Vars["replicas"] = 2
+	options.Vars["max_surge"] = "3"
+	options.Vars["max_unavailable"] = "0"
+
 	options.Vars["annotations"] = map[string]interface{}{"foo": "bar"}
 
 	options.Vars["ports"] = map[string]interface{}{
@@ -114,6 +117,7 @@ func TestApplyAndDestroyWithSingleContainer(t *testing.T) {
 	options.Vars["image"] = "\"training/webapp:latest\""
 
 	options.Vars["inject_linkerd"] = true
+	options.Vars["strategy"] = "Recreate"
 
 	options.Vars["ports"] = map[string]interface{}{
 		"5000": map[string]interface{}{
