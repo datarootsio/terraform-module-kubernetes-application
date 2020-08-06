@@ -22,3 +22,6 @@ lint: lint-tf lint-go
 
 test: tools lint
 	go test -timeout 2h ./...
+
+testverbose: tools lint
+	go test -v -timeout 2h ./...

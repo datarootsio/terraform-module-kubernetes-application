@@ -37,6 +37,11 @@ ports = {
   }
 }
 
+annotations = {
+  "foo" = "bar"
+  "bar" = "baz"
+}
+
 environment_variables_from_secret = {
   "container-a" = {
     "FOO_SECRET" = {

@@ -20,9 +20,7 @@ resource "kubernetes_deployment" "container" {
         labels = {
           app = var.name
         }
-        annotations = merge(
-          local.linkerd_annotations,
-        )
+        annotations = local.annotations
       }
 
       spec {
