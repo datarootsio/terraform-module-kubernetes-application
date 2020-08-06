@@ -186,8 +186,8 @@ func TestApplyAndDestroyWithSingleContainer(t *testing.T) {
 	assert.Contains(t, pod.ObjectMeta.Annotations, "foo")
 	assert.Contains(t, pod.ObjectMeta.Annotations, "bar")
 	assert.Equal(t, "bar", pod.ObjectMeta.Annotations["foo"])
-    assert.EqualValues(t, "127.0.0.1", pod.Spec.HostAliases[0].IP)
-    assert.EqualValues(t, []string{"foo.bar","bar.baz"}, pod.Spec.HostAliases[0].Hostnames)
+	assert.EqualValues(t, "127.0.0.1", pod.Spec.HostAliases[0].IP)
+	assert.EqualValues(t, []string{"foo.bar", "bar.baz"}, pod.Spec.HostAliases[0].Hostnames)
 	assert.Equal(t, "enabled", pod.ObjectMeta.Annotations["linkerd.io/inject"])
 }
 
