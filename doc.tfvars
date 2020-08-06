@@ -62,8 +62,7 @@ node_affinity = {
             {
               key      = "kubernetes.io/os"
               operator = "In"
-              values = [
-              "linux"]
+              values   = ["linux"]
             }
           ]
         }
