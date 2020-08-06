@@ -42,6 +42,11 @@ annotations = {
   "bar" = "baz"
 }
 
+host_aliases = {
+  "127.0.0.1" = ["foo.bar"],
+  "8.8.8.8"   = ["bar.baz", "baz.qux"]
+}
+
 environment_variables_from_secret = {
   "container-a" = {
     "FOO_SECRET" = {

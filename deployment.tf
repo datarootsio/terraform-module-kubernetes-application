@@ -26,6 +26,13 @@ resource "kubernetes_deployment" "container" {
       }
 
       spec {
+        dynamic "host_aliases" {
+          for_each = var.host_aliases
+          content {
+            hostnames = host_aliases.value
+            ip        = host_aliases.key
+          }
+        }
 
         automount_service_account_token = true
 
