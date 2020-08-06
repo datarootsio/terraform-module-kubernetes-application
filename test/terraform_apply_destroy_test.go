@@ -51,6 +51,7 @@ func TestApplyAndDestroyWithDefaultValues(t *testing.T) {
 	k8s.KubectlApply(t, k8sOptions, kubeResourcePath)
 
 	options.Vars["image"] = map[string]interface{}{"test-container": "training/webapp:latest"}
+	options.Vars["replicas"] = 2
 	options.Vars["annotations"] = map[string]interface{}{"foo": "bar"}
 
 	options.Vars["ports"] = map[string]interface{}{
@@ -83,9 +84,12 @@ func TestApplyAndDestroyWithDefaultValues(t *testing.T) {
 	_, err = terraform.InitAndApplyE(t, options)
 	assert.NoError(t, err)
 
-	pod := k8s.ListPods(t, k8sOptions, metav1.ListOptions{LabelSelector: "app=test-name"})[0]
+	pods := k8s.ListPods(t, k8sOptions, metav1.ListOptions{LabelSelector: "app=test-name"})
+
+	pod := pods[0]
 	container := pod.Spec.Containers[0]
 
+    assert.Equal(t,len(pods),2)
 	assert.Equal(t, "training/webapp:latest", container.Image)
 	assert.NotContains(t, pod.ObjectMeta.Annotations, "linkerd.io/inject")
 	assert.Contains(t, pod.ObjectMeta.Annotations, "foo")

@@ -15,6 +15,8 @@ resource "kubernetes_deployment" "container" {
       }
     }
 
+    replicas = var.replicas
+
     template {
       metadata {
         labels = {
