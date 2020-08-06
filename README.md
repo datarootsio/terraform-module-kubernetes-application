@@ -62,8 +62,8 @@ However, you have to be consistent across variables, you cannot mix styles.
 
 ## Requirements
 
-| Name      | Version |
-| --------- | ------- |
+| Name      | Version    |
+| --------- | ---------- |
 | terraform | ~> 0.12.20 |
 
 ## Providers
@@ -74,21 +74,28 @@ However, you have to be consistent across variables, you cannot mix styles.
 
 ## Inputs
 
-| Name                                 | Description                                                                                                                                                             | Type     | Default                                                                                                        | Required |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------- | :------: |
-| environment\_variables               | Map of environment variables to inject in containers.                                                                                                                   | `any`    | `{}`                                                                                                           |    no    |
-| environment\_variables\_from\_secret | Map of environment variables to inject in containers, from existing secrets.                                                                                            | `any`    | `{}`                                                                                                           |    no    |
-| hpa                                  | settings for the horizontal pod autoscaler                                                                                                                              | `map`    | <pre>{<br>  "enabled": false,<br>  "max_replicas": 6,<br>  "min_replicas": 2,<br>  "target_cpu": 80<br>}</pre> |    no    |
-| image                                | The image to deploy.                                                                                                                                                    | `map`    | n/a                                                                                                            |   yes    |
-| image\_pull\_secrets                 | List of image pull secrets to use with the containers                                                                                                                    | `list`    | `[]`                                                                                                           |    no    |
-| inject\_linkerd                 | Enabling linkerd injection on the deployment                                                                                                                    | `bool`    | `false`                                                                                                           |    no    |
-| liveness\_probes                     | Map of liveness probes per container. Pass the regular terraform object as is : https://www.terraform.io/docs/providers/kubernetes/r/deployment.html#liveness_probe-1   | `map`    | `{}`                                                                                                           |    no    |
-| name                                 | The name of the deployment. Will be used for all other resources                                                                                                        | `string` | n/a                                                                                                            |   yes    |
-| namespace                            | The namespace where this deployment will live. Must exists.                                                                                                             | `string` | n/a                                                                                                            |   yes    |
-| ports                                | Map of ports to expose, and associated settings.                                                                                                                        | `any`    | `{}`                                                                                                           |    no    |
-| readiness\_probes                    | Map of readiness probes per container. Pass the regular terraform object as is : https://www.terraform.io/docs/providers/kubernetes/r/deployment.html#readiness_probe-1 | `map`    | `{}`                                                                                                           |    no    |
-| resources\_limits                    | Map of resources limits to assign to the container                                                                                                                      | `map`    | <pre>{<br>  "cpu": "0.2",<br>  "memory": "256Mi"<br>}</pre>                                                    |    no    |
-| resources\_requests                  | Map of resources requests to assign to the container                                                                                                                    | `map`    | <pre>{<br>  "cpu": "0.1",<br>  "memory": "128Mi"<br>}</pre>                                                    |    no    |
+| Name                                 | Description                                                                                                                                                             | Type           | Default                                                                                                        | Required |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------- | :------: |
+| annotations                          | Map of annotations to add on containers.                                                                                                                                | `map(string)`  | `{}`                                                                                                           |    no    |
+| args                                 | Arguments to pass to the container                                                                                                                                      | `any`          | `{}`                                                                                                           |    no    |
+| command                              | Command that the container will run                                                                                                                                     | `any`          | `{}`                                                                                                           |    no    |
+| environment\_variables               | Map of environment variables to inject in containers.                                                                                                                   | `any`          | `{}`                                                                                                           |    no    |
+| environment\_variables\_from\_secret | Map of environment variables to inject in containers, from existing secrets.                                                                                            | `any`          | `{}`                                                                                                           |    no    |
+| hpa                                  | settings for the horizontal pod autoscaler                                                                                                                              | `any`          | <pre>{<br>  "enabled": false,<br>  "max_replicas": 6,<br>  "min_replicas": 2,<br>  "target_cpu": 80<br>}</pre> |    no    |
+| image                                | The image to deploy.                                                                                                                                                    | `any`          | n/a                                                                                                            |   yes    |
+| image\_pull\_secrets                 | List of image pull secrets to use with the containers                                                                                                                   | `list(string)` | `[]`                                                                                                           |    no    |
+| inject\_linkerd                      | Add the necessary annotations for linkerd injection                                                                                                                     | `bool`         | `false`                                                                                                        |    no    |
+| liveness\_probes                     | Map of liveness probes per container. Pass the regular terraform object as is : https://www.terraform.io/docs/providers/kubernetes/r/deployment.html#liveness_probe-1   | `any`          | n/a                                                                                                            |   yes    |
+| name                                 | The name of the deployment. Will be used for all other resources                                                                                                        | `string`       | n/a                                                                                                            |   yes    |
+| namespace                            | The namespace where this deployment will live. Must exists.                                                                                                             | `string`       | n/a                                                                                                            |   yes    |
+| node\_selector                       | Map of labels and values for node selection                                                                                                                             | `map(string)`  | `{}`                                                                                                           |    no    |
+| ports                                | Map of ports to expose, and associated settings.                                                                                                                        | `any`          | `{}`                                                                                                           |    no    |
+| readiness\_probes                    | Map of readiness probes per container. Pass the regular terraform object as is : https://www.terraform.io/docs/providers/kubernetes/r/deployment.html#readiness_probe-1 | `any`          | n/a                                                                                                            |   yes    |
+| resources\_limits                    | Map of resources limits to assign to the container                                                                                                                      | `map`          | <pre>{<br>  "cpu": "0.2",<br>  "memory": "256Mi"<br>}</pre>                                                    |    no    |
+| resources\_requests                  | Map of resources requests to assign to the container                                                                                                                    | `map`          | <pre>{<br>  "cpu": "0.1",<br>  "memory": "128Mi"<br>}</pre>                                                    |    no    |
+| volume\_mounts                       | Map of volumes to mount.                                                                                                                                                | `any`          | `{}`                                                                                                           |    no    |
+| volumes\_mounts\_from\_config\_map   | Map of volumes to mount from config maps.                                                                                                                               | `any`          | `{}`                                                                                                           |    no    |
+| volumes\_mounts\_from\_secret        | Map of volumes to mount from secrets.                                                                                                                                   | `any`          | `{}`                                                                                                           |    no    |
 
 ## Example values
 
@@ -237,6 +244,17 @@ hpa = {
   target_memory = 70
   min_replicas  = 4
   max_replicas  = 20
+}
+```
+
+### Annotations
+
+A map of annotations that will be added to the deployment. Will be merged with specific linkerd annotations if you set `inject_linkerd` to `true`.
+
+```hcl
+annotations = {
+  foo = bar
+  bar = baz
 }
 ```
 

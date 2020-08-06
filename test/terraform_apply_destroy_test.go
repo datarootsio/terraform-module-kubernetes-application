@@ -11,6 +11,7 @@ import (
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
 	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func getDefaultTerraformOptions(t *testing.T, suffix string) (string, *terraform.Options, error) {
@@ -50,6 +51,7 @@ func TestApplyAndDestroyWithDefaultValues(t *testing.T) {
 	k8s.KubectlApply(t, k8sOptions, kubeResourcePath)
 
 	options.Vars["image"] = map[string]interface{}{"test-container": "training/webapp:latest"}
+	options.Vars["annotations"] = map[string]interface{}{"foo": "bar"}
 
 	options.Vars["ports"] = map[string]interface{}{
 		"test-container": map[string]interface{}{
@@ -80,6 +82,14 @@ func TestApplyAndDestroyWithDefaultValues(t *testing.T) {
 	defer terraform.Destroy(t, options)
 	_, err = terraform.InitAndApplyE(t, options)
 	assert.NoError(t, err)
+
+	pod := k8s.ListPods(t, k8sOptions, metav1.ListOptions{LabelSelector: "app=test-name"})[0]
+	container := pod.Spec.Containers[0]
+
+	assert.Equal(t, "training/webapp:latest", container.Image)
+	assert.NotContains(t, pod.ObjectMeta.Annotations, "linkerd.io/inject")
+	assert.Contains(t, pod.ObjectMeta.Annotations, "foo")
+	assert.Equal(t, "bar", pod.ObjectMeta.Annotations["foo"])
 }
 
 func TestApplyAndDestroyWithSingleContainer(t *testing.T) {
@@ -99,6 +109,8 @@ func TestApplyAndDestroyWithSingleContainer(t *testing.T) {
 
 	options.Vars["image"] = "\"training/webapp:latest\""
 
+	options.Vars["inject_linkerd"] = true
+
 	options.Vars["ports"] = map[string]interface{}{
 		"5000": map[string]interface{}{
 			"protocol": "TCP",
@@ -110,6 +122,11 @@ func TestApplyAndDestroyWithSingleContainer(t *testing.T) {
 			"port": 5000,
 		},
 		"type": "tcp_socket",
+	}
+
+	options.Vars["annotations"] = map[string]interface{}{
+		"foo": "bar",
+		"bar": "baz",
 	}
 
 	options.Vars["image_pull_secrets"] = []string{"'my-secret'", "'my-other-secret'"}
@@ -149,6 +166,16 @@ func TestApplyAndDestroyWithSingleContainer(t *testing.T) {
 	defer terraform.Destroy(t, options)
 	_, err = terraform.InitAndApplyE(t, options)
 	assert.NoError(t, err)
+
+	pod := k8s.ListPods(t, k8sOptions, metav1.ListOptions{LabelSelector: "app=test-name"})[0]
+	container := pod.Spec.Containers[0]
+
+	assert.Equal(t, "training/webapp:latest", container.Image)
+	assert.Contains(t, pod.ObjectMeta.Annotations, "linkerd.io/inject")
+	assert.Contains(t, pod.ObjectMeta.Annotations, "foo")
+	assert.Contains(t, pod.ObjectMeta.Annotations, "bar")
+	assert.Equal(t, "bar", pod.ObjectMeta.Annotations["foo"])
+	assert.Equal(t, "enabled", pod.ObjectMeta.Annotations["linkerd.io/inject"])
 }
 
 func TestApplyAndDestroyWithPlentyOfValues(t *testing.T) {
@@ -269,8 +296,8 @@ func TestApplyAndDestroyWithPlentyOfValues(t *testing.T) {
 	}
 
 	options.Vars["node_selector"] = map[string]interface{}{
-        "kubernetes.io/os": "linux",
-    }
+		"kubernetes.io/os": "linux",
+	}
 
 	defer terraform.Destroy(t, options)
 	_, err = terraform.InitAndApplyE(t, options)
