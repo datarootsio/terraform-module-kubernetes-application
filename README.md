@@ -93,6 +93,8 @@ However, you have to be consistent across variables, you cannot mix styles.
 | namespace                            | The namespace where this deployment will live. Must exists.                                                                                                             | `string`            | n/a                                                                                                            |   yes    |
 | node\_affinity                       | Definition of the node affinity. See below                                                                                                                              | `any`               | `{}`                                                                                                           |    no    |
 | node\_selector                       | Map of labels and values for node selection                                                                                                                             | `map(string)`       | `{}`                                                                                                           |    no    |
+| pod\_affinity                        | Definition of the pod affinity. See below                                                                                                                               | `any`               | `{}`                                                                                                           |    no    |
+| pod\_anti\_affinity                  | Definition of the pod anti-affinity. See below                                                                                                                          | `any`               | `{}`                                                                                                           |    no    |
 | ports                                | Map of ports to expose, and associated settings.                                                                                                                        | `any`               | `{}`                                                                                                           |    no    |
 | readiness\_probes                    | Map of readiness probes per container. Pass the regular terraform object as is : https://www.terraform.io/docs/providers/kubernetes/r/deployment.html#readiness_probe-1 | `any`               | n/a                                                                                                            |   yes    |
 | replicas                             | Amount of replicas                                                                                                                                                      | `number`            | `1`                                                                                                            |    no    |
@@ -274,6 +276,56 @@ node_affinity = {
             values   = ["linux"]
           }
         ]
+      }
+    }
+  ]
+}
+```
+
+### Pod (anti-)affinity
+
+This block allows to define pod (anti-)affinity. You can see the settings here : https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/deployment#pod_affinity
+
+We cannot pass blocks as is so you have to create a map from it (aka adding the `=` sign)
+
+```hcl
+pod_affinity = {
+  required_during_scheduling_ignored_during_execution = [
+    {
+      label_selector = {
+        match_labels = {
+          "foo" = "bar"
+        }
+        match_expressions = [
+          {
+            key      = "security"
+            operator = "In"
+            values   = ["S1"]
+          }
+        ]
+      }
+      namespaces   = ["kube-system"]
+      topology_key = "failure-domain.beta.kubernetes.io/zone"
+    }
+  ]
+  preferred_during_scheduling_ignored_during_execution = [
+    {
+      weight = 1
+      pod_affinity_term = {
+        label_selector = {
+          match_labels = {
+            "foo" = "bar"
+          }
+          match_expressions = [
+            {
+              key      = "security"
+              operator = "In"
+              values   = ["S1"]
+            }
+          ]
+        }
+        namespaces   = ["kube-system"]
+        topology_key = "failure-domain.beta.kubernetes.io/zone"
       }
     }
   ]

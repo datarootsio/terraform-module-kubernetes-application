@@ -365,8 +365,8 @@ func TestApplyAndDestroyWithPlentyOfValues(t *testing.T) {
 	options.Vars["node_selector"] = map[string]interface{}{
 		"kubernetes.io/os": "linux",
 	}
-/*
-	options.Vars["pod_affinity"] = map[string]interface{}{
+
+	options.Vars["pod_anti_affinity"] = map[string]interface{}{
 		"preferred_during_scheduling_ignored_during_execution": []interface{}{
 			map[string]interface{}{
 				"weight": 10,
@@ -401,7 +401,7 @@ func TestApplyAndDestroyWithPlentyOfValues(t *testing.T) {
 			},
 		},
 	}
-*/
+
 	defer terraform.Destroy(t, options)
 	_, err = terraform.InitAndApplyE(t, options)
 	assert.NoError(t, err)
