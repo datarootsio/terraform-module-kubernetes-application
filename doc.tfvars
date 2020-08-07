@@ -86,8 +86,48 @@ node_affinity = {
 }
 
 pod_affinity = {
-
+  required_during_scheduling_ignored_during_execution = [
+    {
+      label_selector = {
+        match_labels = {
+          "foo" = "bar"
+        }
+        match_expressions = [
+          {
+            key      = "security"
+            operator = "In"
+            values   = ["S1"]
+          }
+        ]
+      }
+      namespaces   = ["kube-system"]
+      topology_key = "failure-domain.beta.kubernetes.io/zone"
+    }
+  ]
+  preferred_during_scheduling_ignored_during_execution = [
+    {
+      weight = 1
+      pod_affinity_term = {
+        label_selector = {
+          match_labels = {
+            "foo" = "bar"
+          }
+          match_expressions = [
+            {
+              key      = "security"
+              operator = "In"
+              values = [
+              "S1"]
+            }
+          ]
+        }
+        namespaces   = ["kube-system"]
+        topology_key = "failure-domain.beta.kubernetes.io/zone"
+      }
+    }
+  ]
 }
+
 pod_anti_affinity = {
 
 }

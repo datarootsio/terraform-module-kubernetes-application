@@ -35,7 +35,6 @@ func getDefaultTerraformOptions(t *testing.T, suffix string) (string, *terraform
 	return namespace, terraformOptions, nil
 }
 
-
 func TestApplyAndDestroyWithDefaultValues(t *testing.T) {
 	t.Parallel()
 
@@ -366,7 +365,43 @@ func TestApplyAndDestroyWithPlentyOfValues(t *testing.T) {
 	options.Vars["node_selector"] = map[string]interface{}{
 		"kubernetes.io/os": "linux",
 	}
-
+/*
+	options.Vars["pod_affinity"] = map[string]interface{}{
+		"preferred_during_scheduling_ignored_during_execution": []interface{}{
+			map[string]interface{}{
+				"weight": 10,
+				"pod_affinity_term": map[string]interface{}{
+					"namespaces":   []string{namespace},
+					"topology_key": "kubernetes.io/hostname",
+					"label_selector": map[string]interface{}{
+						"match_expressions": []interface{}{
+							map[string]interface{}{
+								"key":      "node-role.kubernetes.io/master",
+								"operator": "In",
+								"values":   []string{"true"},
+							},
+						},
+					},
+				},
+			},
+		},
+		"required_during_scheduling_ignored_during_execution": []interface{}{
+			map[string]interface{}{
+				"namespaces":   []string{namespace},
+				"topology_key": "kubernetes.io/hostname",
+				"label_selector": map[string]interface{}{
+					"match_expressions": []interface{}{
+						map[string]interface{}{
+							"key":      "node-role.kubernetes.io/master",
+							"operator": "In",
+							"values":   []string{"true"},
+						},
+					},
+				},
+			},
+		},
+	}
+*/
 	defer terraform.Destroy(t, options)
 	_, err = terraform.InitAndApplyE(t, options)
 	assert.NoError(t, err)
