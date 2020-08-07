@@ -143,6 +143,55 @@ func TestApplyAndDestroyWithSingleContainer(t *testing.T) {
 		"127.0.0.1": []string{"foo.bar", "bar.baz"},
 	}
 
+	options.Vars["node_affinity"] = map[string]interface{}{
+		"preferred_during_scheduling_ignored_during_execution": []interface{}{
+			map[string]interface{}{
+				"weight": 10,
+				"preference": map[string]interface{}{
+					"match_expressions": []interface{}{
+						map[string]interface{}{
+							"key":      "kubernetes.io/os",
+							"operator": "In",
+							"values":   []string{"linux"},
+						},
+						map[string]interface{}{
+							"key":      "beta.kubernetes.io/instance-type",
+							"operator": "In",
+							"values":   []string{"k3s"},
+						},
+					},
+				},
+			},
+			map[string]interface{}{
+				"weight": 100,
+				"preference": map[string]interface{}{
+					"match_expressions": []interface{}{
+						map[string]interface{}{
+							"key":      "beta.kubernetes.io/arch",
+							"operator": "In",
+							"values":   []string{"amd64"},
+						},
+					},
+				},
+			},
+		},
+		"required_during_scheduling_ignored_during_execution": []interface{}{
+			map[string]interface{}{
+				"node_selector_term": []interface{}{
+					map[string]interface{}{
+						"match_expressions": []interface{}{
+							map[string]interface{}{
+								"key":      "kubernetes.io/os",
+								"operator": "In",
+								"values":   []string{"linux"},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
 	options.Vars["liveness_probes"] = map[string]interface{}{
 		"tcp_socket": map[string]interface{}{
 			"port": 5000,
@@ -190,6 +239,7 @@ func TestApplyAndDestroyWithSingleContainer(t *testing.T) {
 	assert.Contains(t, pod.ObjectMeta.Annotations, "foo")
 	assert.Contains(t, pod.ObjectMeta.Annotations, "bar")
 	assert.Equal(t, "bar", pod.ObjectMeta.Annotations["foo"])
+	assert.Equal(t, "kubernetes.io/os", pod.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms[0].MatchExpressions[0].Key)
 	assert.EqualValues(t, "127.0.0.1", pod.Spec.HostAliases[0].IP)
 	assert.EqualValues(t, []string{"foo.bar", "bar.baz"}, pod.Spec.HostAliases[0].Hostnames)
 	assert.Equal(t, "enabled", pod.ObjectMeta.Annotations["linkerd.io/inject"])
@@ -314,6 +364,42 @@ func TestApplyAndDestroyWithPlentyOfValues(t *testing.T) {
 
 	options.Vars["node_selector"] = map[string]interface{}{
 		"kubernetes.io/os": "linux",
+	}
+
+	options.Vars["pod_anti_affinity"] = map[string]interface{}{
+		"preferred_during_scheduling_ignored_during_execution": []interface{}{
+			map[string]interface{}{
+				"weight": 10,
+				"pod_affinity_term": map[string]interface{}{
+					"namespaces":   []string{namespace},
+					"topology_key": "kubernetes.io/hostname",
+					"label_selector": map[string]interface{}{
+						"match_expressions": []interface{}{
+							map[string]interface{}{
+								"key":      "node-role.kubernetes.io/master",
+								"operator": "In",
+								"values":   []string{"true"},
+							},
+						},
+					},
+				},
+			},
+		},
+		"required_during_scheduling_ignored_during_execution": []interface{}{
+			map[string]interface{}{
+				"namespaces":   []string{namespace},
+				"topology_key": "kubernetes.io/hostname",
+				"label_selector": map[string]interface{}{
+					"match_expressions": []interface{}{
+						map[string]interface{}{
+							"key":      "node-role.kubernetes.io/master",
+							"operator": "In",
+							"values":   []string{"true"},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	defer terraform.Destroy(t, options)

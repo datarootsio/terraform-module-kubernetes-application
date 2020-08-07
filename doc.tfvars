@@ -53,6 +53,122 @@ max_surge = "50%"
 
 max_unavailable = "50%"
 
+node_affinity = {
+  required_during_scheduling_ignored_during_execution = [
+    {
+      node_selector_term = [
+        {
+          match_expressions = [
+            {
+              key      = "kubernetes.io/os"
+              operator = "In"
+              values   = ["linux"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+  preferred_during_scheduling_ignored_during_execution = [
+    {
+      weight = 1
+      preference = {
+        match_expressions = [
+          {
+            key      = "kubernetes.io/os"
+            operator = "In"
+            values   = ["linux"]
+          }
+        ]
+      }
+    }
+  ]
+}
+
+pod_affinity = {
+  required_during_scheduling_ignored_during_execution = [
+    {
+      label_selector = {
+        match_labels = {
+          "foo" = "bar"
+        }
+        match_expressions = [
+          {
+            key      = "security"
+            operator = "In"
+            values   = ["S1"]
+          }
+        ]
+      }
+      namespaces   = ["kube-system"]
+      topology_key = "failure-domain.beta.kubernetes.io/zone"
+    }
+  ]
+  preferred_during_scheduling_ignored_during_execution = [
+    {
+      weight = 1
+      pod_affinity_term = {
+        label_selector = {
+          match_labels = {
+            "foo" = "bar"
+          }
+          match_expressions = [
+            {
+              key      = "security"
+              operator = "In"
+              values   = ["S1"]
+            }
+          ]
+        }
+        namespaces   = ["kube-system"]
+        topology_key = "failure-domain.beta.kubernetes.io/zone"
+      }
+    }
+  ]
+}
+
+pod_anti_affinity = {
+  required_during_scheduling_ignored_during_execution = [
+    {
+      label_selector = {
+        match_labels = {
+          "foo" = "bar"
+        }
+        match_expressions = [
+          {
+            key      = "security"
+            operator = "In"
+            values   = ["S1"]
+          }
+        ]
+      }
+      namespaces   = ["kube-system"]
+      topology_key = "failure-domain.beta.kubernetes.io/zone"
+    }
+  ]
+  preferred_during_scheduling_ignored_during_execution = [
+    {
+      weight = 1
+      pod_affinity_term = {
+        label_selector = {
+          match_labels = {
+            "foo" = "bar"
+          }
+          match_expressions = [
+            {
+              key      = "security"
+              operator = "In"
+              values   = ["S1"]
+            }
+          ]
+        }
+        namespaces   = ["kube-system"]
+        topology_key = "failure-domain.beta.kubernetes.io/zone"
+      }
+    }
+  ]
+}
+
 environment_variables_from_secret = {
   "container-a" = {
     "FOO_SECRET" = {
