@@ -1,4 +1,5 @@
 resource "kubernetes_service" "k8s_service" {
+  count = length(local.ports_map) == 0 ? 0 : 1
   metadata {
     name      = var.name
     namespace = var.namespace
