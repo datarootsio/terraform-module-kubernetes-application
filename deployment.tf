@@ -45,34 +45,19 @@ resource "kubernetes_deployment" "container" {
           }
         }
 
-        affinity {
-          dynamic "node_affinity" {
-            for_each = length(var.node_affinity) > 0 ? ["node_affinity"] : []
-            content {
-              dynamic "preferred_during_scheduling_ignored_during_execution" {
-                for_each = { for v in lookup(var.node_affinity, "preferred_during_scheduling_ignored_during_execution", []) : uuid() => v }
-                content {
-                  weight = preferred_during_scheduling_ignored_during_execution.value["weight"]
-                  preference {
-                    dynamic "match_expressions" {
-                      for_each = { for v in lookup(preferred_during_scheduling_ignored_during_execution.value["preference"], "match_expressions", []) : uuid() => v }
-                      content {
-                        key      = match_expressions.value["key"]
-                        operator = match_expressions.value["operator"]
-                        values   = lookup(match_expressions.value, "values", [])
-                      }
-                    }
-                  }
-                }
-              }
-              dynamic "required_during_scheduling_ignored_during_execution" {
-                for_each = { for v in lookup(var.node_affinity, "required_during_scheduling_ignored_during_execution", []) : uuid() => v }
-                content {
-                  dynamic "node_selector_term" {
-                    for_each = { for v in lookup(required_during_scheduling_ignored_during_execution.value, "node_selector_term", []) : uuid() => v }
-                    content {
+        dynamic "affinity" {
+          for_each = length(var.node_affinity) > 0 || length(var.pod_affinity) > 0 || length(var.node_affinity) > 0 ? ["affinity"] : []
+          content {
+            dynamic "node_affinity" {
+              for_each = length(var.node_affinity) > 0 ? ["node_affinity"] : []
+              content {
+                dynamic "preferred_during_scheduling_ignored_during_execution" {
+                  for_each = { for v in lookup(var.node_affinity, "preferred_during_scheduling_ignored_during_execution", []) : uuid() => v }
+                  content {
+                    weight = preferred_during_scheduling_ignored_during_execution.value["weight"]
+                    preference {
                       dynamic "match_expressions" {
-                        for_each = { for v in lookup(node_selector_term.value, "match_expressions", []) : uuid() => v }
+                        for_each = { for v in lookup(preferred_during_scheduling_ignored_during_execution.value["preference"], "match_expressions", []) : uuid() => v }
                         content {
                           key      = match_expressions.value["key"]
                           operator = match_expressions.value["operator"]
@@ -82,23 +67,57 @@ resource "kubernetes_deployment" "container" {
                     }
                   }
                 }
+                dynamic "required_during_scheduling_ignored_during_execution" {
+                  for_each = { for v in lookup(var.node_affinity, "required_during_scheduling_ignored_during_execution", []) : uuid() => v }
+                  content {
+                    dynamic "node_selector_term" {
+                      for_each = { for v in lookup(required_during_scheduling_ignored_during_execution.value, "node_selector_term", []) : uuid() => v }
+                      content {
+                        dynamic "match_expressions" {
+                          for_each = { for v in lookup(node_selector_term.value, "match_expressions", []) : uuid() => v }
+                          content {
+                            key      = match_expressions.value["key"]
+                            operator = match_expressions.value["operator"]
+                            values   = lookup(match_expressions.value, "values", [])
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
-          }
-          dynamic "pod_affinity" {
-            for_each = length(var.pod_affinity) > 0 ? ["pod_affinity"] : []
-            content {
-              dynamic "preferred_during_scheduling_ignored_during_execution" {
-                for_each = { for v in lookup(var.pod_affinity, "preferred_during_scheduling_ignored_during_execution", []) : uuid() => v }
-                content {
-                  weight = preferred_during_scheduling_ignored_during_execution.value["weight"]
-                  pod_affinity_term {
-                    namespaces   = lookup(preferred_during_scheduling_ignored_during_execution.value["pod_affinity_term"], "namespaces", [])
-                    topology_key = lookup(preferred_during_scheduling_ignored_during_execution.value["pod_affinity_term"], "topology_key", "")
+            dynamic "pod_affinity" {
+              for_each = length(var.pod_affinity) > 0 ? ["pod_affinity"] : []
+              content {
+                dynamic "preferred_during_scheduling_ignored_during_execution" {
+                  for_each = { for v in lookup(var.pod_affinity, "preferred_during_scheduling_ignored_during_execution", []) : uuid() => v }
+                  content {
+                    weight = preferred_during_scheduling_ignored_during_execution.value["weight"]
+                    pod_affinity_term {
+                      namespaces   = lookup(preferred_during_scheduling_ignored_during_execution.value["pod_affinity_term"], "namespaces", [])
+                      topology_key = lookup(preferred_during_scheduling_ignored_during_execution.value["pod_affinity_term"], "topology_key", "")
+                      label_selector {
+                        match_labels = lookup(preferred_during_scheduling_ignored_during_execution.value["pod_affinity_term"]["label_selector"], "match_labels", {})
+                        dynamic "match_expressions" {
+                          for_each = { for v in lookup(preferred_during_scheduling_ignored_during_execution.value["pod_affinity_term"]["label_selector"], "match_expressions", []) : uuid() => v }
+                          content {
+                            key      = match_expressions.value["key"]
+                            operator = match_expressions.value["operator"]
+                            values   = lookup(match_expressions.value, "values", [])
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                dynamic "required_during_scheduling_ignored_during_execution" {
+                  for_each = { for v in lookup(var.pod_affinity, "required_during_scheduling_ignored_during_execution", []) : uuid() => v }
+                  content {
                     label_selector {
-                      match_labels = lookup(preferred_during_scheduling_ignored_during_execution.value["pod_affinity_term"]["label_selector"], "match_labels", {})
+                      match_labels = lookup(required_during_scheduling_ignored_during_execution.value["label_selector"], "match_labels", {})
                       dynamic "match_expressions" {
-                        for_each = { for v in lookup(preferred_during_scheduling_ignored_during_execution.value["pod_affinity_term"]["label_selector"], "match_expressions", []) : uuid() => v }
+                        for_each = { for v in lookup(required_during_scheduling_ignored_during_execution.value["label_selector"], "match_expressions", []) : uuid() => v }
                         content {
                           key      = match_expressions.value["key"]
                           operator = match_expressions.value["operator"]
@@ -106,44 +125,44 @@ resource "kubernetes_deployment" "container" {
                         }
                       }
                     }
+                    namespaces   = lookup(required_during_scheduling_ignored_during_execution.value, "namespaces", [])
+                    topology_key = lookup(required_during_scheduling_ignored_during_execution.value, "topology_key", "")
                   }
-                }
-              }
-              dynamic "required_during_scheduling_ignored_during_execution" {
-                for_each = { for v in lookup(var.pod_affinity, "required_during_scheduling_ignored_during_execution", []) : uuid() => v }
-                content {
-                  label_selector {
-                    match_labels = lookup(required_during_scheduling_ignored_during_execution.value["label_selector"], "match_labels", {})
-                    dynamic "match_expressions" {
-                      for_each = { for v in lookup(required_during_scheduling_ignored_during_execution.value["label_selector"], "match_expressions", []) : uuid() => v }
-                      content {
-                        key      = match_expressions.value["key"]
-                        operator = match_expressions.value["operator"]
-                        values   = lookup(match_expressions.value, "values", [])
-                      }
-                    }
-                  }
-                  namespaces   = lookup(required_during_scheduling_ignored_during_execution.value, "namespaces", [])
-                  topology_key = lookup(required_during_scheduling_ignored_during_execution.value, "topology_key", "")
                 }
               }
             }
-          }
 
-          dynamic "pod_anti_affinity" {
-            for_each = length(var.pod_anti_affinity) > 0 ? ["pod_anti_affinity"] : []
-            content {
-              dynamic "preferred_during_scheduling_ignored_during_execution" {
-                for_each = { for v in lookup(var.pod_anti_affinity, "preferred_during_scheduling_ignored_during_execution", []) : uuid() => v }
-                content {
-                  weight = preferred_during_scheduling_ignored_during_execution.value["weight"]
-                  pod_affinity_term {
-                    namespaces   = lookup(preferred_during_scheduling_ignored_during_execution.value["pod_affinity_term"], "namespaces", [])
-                    topology_key = lookup(preferred_during_scheduling_ignored_during_execution.value["pod_affinity_term"], "topology_key", "")
+            dynamic "pod_anti_affinity" {
+              for_each = length(var.pod_anti_affinity) > 0 ? ["pod_anti_affinity"] : []
+              content {
+                dynamic "preferred_during_scheduling_ignored_during_execution" {
+                  for_each = { for v in lookup(var.pod_anti_affinity, "preferred_during_scheduling_ignored_during_execution", []) : uuid() => v }
+                  content {
+                    weight = preferred_during_scheduling_ignored_during_execution.value["weight"]
+                    pod_affinity_term {
+                      namespaces   = lookup(preferred_during_scheduling_ignored_during_execution.value["pod_affinity_term"], "namespaces", [])
+                      topology_key = lookup(preferred_during_scheduling_ignored_during_execution.value["pod_affinity_term"], "topology_key", "")
+                      label_selector {
+                        match_labels = lookup(preferred_during_scheduling_ignored_during_execution.value["pod_affinity_term"]["label_selector"], "match_labels", {})
+                        dynamic "match_expressions" {
+                          for_each = { for v in lookup(preferred_during_scheduling_ignored_during_execution.value["pod_affinity_term"]["label_selector"], "match_expressions", []) : uuid() => v }
+                          content {
+                            key      = match_expressions.value["key"]
+                            operator = match_expressions.value["operator"]
+                            values   = lookup(match_expressions.value, "values", [])
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                dynamic "required_during_scheduling_ignored_during_execution" {
+                  for_each = { for v in lookup(var.pod_anti_affinity, "required_during_scheduling_ignored_during_execution", []) : uuid() => v }
+                  content {
                     label_selector {
-                      match_labels = lookup(preferred_during_scheduling_ignored_during_execution.value["pod_affinity_term"]["label_selector"], "match_labels", {})
+                      match_labels = lookup(required_during_scheduling_ignored_during_execution.value["label_selector"], "match_labels", {})
                       dynamic "match_expressions" {
-                        for_each = { for v in lookup(preferred_during_scheduling_ignored_during_execution.value["pod_affinity_term"]["label_selector"], "match_expressions", []) : uuid() => v }
+                        for_each = { for v in lookup(required_during_scheduling_ignored_during_execution.value["label_selector"], "match_expressions", []) : uuid() => v }
                         content {
                           key      = match_expressions.value["key"]
                           operator = match_expressions.value["operator"]
@@ -151,30 +170,13 @@ resource "kubernetes_deployment" "container" {
                         }
                       }
                     }
+                    namespaces   = lookup(required_during_scheduling_ignored_during_execution.value, "namespaces", [])
+                    topology_key = lookup(required_during_scheduling_ignored_during_execution.value, "topology_key", "")
                   }
-                }
-              }
-              dynamic "required_during_scheduling_ignored_during_execution" {
-                for_each = { for v in lookup(var.pod_anti_affinity, "required_during_scheduling_ignored_during_execution", []) : uuid() => v }
-                content {
-                  label_selector {
-                    match_labels = lookup(required_during_scheduling_ignored_during_execution.value["label_selector"], "match_labels", {})
-                    dynamic "match_expressions" {
-                      for_each = { for v in lookup(required_during_scheduling_ignored_during_execution.value["label_selector"], "match_expressions", []) : uuid() => v }
-                      content {
-                        key      = match_expressions.value["key"]
-                        operator = match_expressions.value["operator"]
-                        values   = lookup(match_expressions.value, "values", [])
-                      }
-                    }
-                  }
-                  namespaces   = lookup(required_during_scheduling_ignored_during_execution.value, "namespaces", [])
-                  topology_key = lookup(required_during_scheduling_ignored_during_execution.value, "topology_key", "")
                 }
               }
             }
           }
-
         }
 
         automount_service_account_token = true
@@ -223,8 +225,9 @@ resource "kubernetes_deployment" "container" {
         dynamic "container" {
           for_each = local.image
           content {
-            name  = container.key
-            image = container.value
+            name              = container.key
+            image             = container.value
+            image_pull_policy = var.image_pull_policy
 
             args = lookup(local.args, container.key, [])
 
