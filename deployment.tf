@@ -46,7 +46,7 @@ resource "kubernetes_deployment" "container" {
         }
 
         dynamic "affinity" {
-          for_each = length(var.node_affinity) > 0 || length(var.pod_affinity) > 0 || length(var.node_affinity) > 0 ? ["affinity"] : []
+          for_each = length(var.node_affinity) > 0 || length(var.pod_affinity) > 0 || length(var.pod_anti_affinity) > 0 ? ["affinity"] : []
           content {
             dynamic "node_affinity" {
               for_each = length(var.node_affinity) > 0 ? ["node_affinity"] : []
