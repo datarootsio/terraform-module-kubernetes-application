@@ -163,6 +163,12 @@ variable "pod_anti_affinity" {
   default = {}
 }
 
+variable "image_pull_policy" {
+  type        = string
+  default     = "IfNotPresent"
+  description = "Pull policy for the images, see https://kubernetes.io/docs/concepts/containers/images/"
+}
+
 locals {
 
   linkerd_annotations = {
